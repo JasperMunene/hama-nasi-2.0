@@ -41,6 +41,8 @@ export default function SignInForm() {
       return;
     }
 
+    setLoading(true);
+
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -57,6 +59,8 @@ export default function SignInForm() {
     } catch (err) {
       console.error(err);
       setErrors((prev) => ({ ...prev, password: "Error during login" }));
+    }  finally {
+      setLoading(false);
     }
   };
 
@@ -175,7 +179,7 @@ export default function SignInForm() {
                 <div>
                   <Button className="w-full" size="sm" type="submit">
                   {loading ? (
-                      <span className="animate-pulse">Signing in...</span>
+                      <span className="animate-pulse text-2xl">...</span>
                     ) : (
                       "Login"
                     )}

@@ -252,7 +252,7 @@ export default function SignUpForm() {
                 <div>
                   <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
                     {loading ? (
-                      <span className="animate-pulse">Signing Up...</span>
+                      <span className="animate-pulse text-2xl">...</span>
                     ) : (
                       "Sign Up"
                     )}

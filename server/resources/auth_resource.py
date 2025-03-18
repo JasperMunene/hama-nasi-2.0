@@ -44,9 +44,23 @@ class SignupResource(Resource):
         otp_email_params = {
             "from": "HamaNasi <onboarding@hello.fueldash.net>",
             "to": [args['email']],
-            "subject": "Verify Your Email Address",
-            "html": f"<p>Your OTP code is <strong>{new_user.otp_code}</strong>. It expires in 10 minutes.</p>"
+            "subject": "Verify Your Email - Action Required",
+            "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #0063ff; border-radius: 8px;">
+                    <h2 style="color: #ffffff;">Verify Your Email Address</h2>
+                    <p>Dear User,</p>
+                    <p>Thank you for signing up with HamaNasi. To complete your registration, please verify your email address by using the One-Time Password (OTP) provided below:</p>
+                    <div style="background-color: #f4f4f4; padding: 10px; font-size: 18px; font-weight: bold; text-align: center; border-radius: 4px; margin: 10px 0;">
+                        {new_user.otp_code}
+                    </div>
+                    <p>This OTP is valid for <strong>10 minutes</strong>. If you did not request this verification, please ignore this email.</p>
+                    <p>For security reasons, do not share this code with anyone.</p>
+                    <p>If you have any questions or need assistance, feel free to contact our support team.</p>
+                    <p>Best regards,<br><strong>The HamaNasi Team</strong></p>
+                </div>
+            """
         }
+
         try:
             resend.Emails.send(otp_email_params)
         except Exception as e:
@@ -82,7 +96,10 @@ class VerifyOTPResource(Resource):
         db.session.commit()
 
         # Optionally, issue an access token now that the user is verified
-        access_token = create_access_token(identity=str(user.id))
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims = {'is_verified': user.is_verified}
+        )
         response = make_response({
             "message": "Email verified successfully",
             "access_token": access_token
@@ -115,7 +132,10 @@ class LoginResource(Resource):
         if not user.is_verified:
             return {"message": "Email not verified. Please verify your email using the OTP."}, 401
 
-        access_token = create_access_token(identity=str(user.id))
+        access_token = create_access_token(
+            identity=str(user.id),
+            additional_claims={'is_verified': user.is_verified}
+        )
         response = make_response({
             "message": "Login successful",
             "access_token": access_token
@@ -229,8 +249,21 @@ class ResendOTPResource(Resource):
         otp_email_params = {
             "from": "HamaNasi <onboarding@hello.fueldash.net>",
             "to": [args['email']],
-            "subject": "Verify Your Email Address",
-            "html": f"<p>Your new OTP code is <strong>{new_otp}</strong>. It expires in 10 minutes.</p>"
+            "subject": "New OTP Code - Verify Your Email",
+            "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #0063ff; border-radius: 8px;">
+                    <h2 style="color: #ffffff;">Your New OTP Code</h2>
+                    <p>Dear User,</p>
+                    <p>You recently requested a new One-Time Password (OTP) to verify your email address. Please use the code below to complete the verification process:</p>
+                    <div style="background-color: #f4f4f4; padding: 10px; font-size: 18px; font-weight: bold; text-align: center; border-radius: 4px; margin: 10px 0;">
+                        {new_otp}
+                    </div>
+                    <p>This OTP is valid for <strong>10 minutes</strong>. If you did not request this code, please disregard this email.</p>
+                    <p>For security reasons, do not share this code with anyone.</p>
+                    <p>If you need any assistance, feel free to reach out to our support team.</p>
+                    <p>Best regards,<br><strong>The HamaNasi Team</strong></p>
+                </div>
+            """
         }
 
         # Attempt to send the OTP email
@@ -263,11 +296,26 @@ class ForgotPasswordResource(Resource):
         # Build a password reset link pointing to the frontend page.
         reset_link = f"http://localhost:3000/new-password?token={reset_token}"
         reset_email_params = {
-            "from": "Hama Nasi <onboarding@hello.fueldash.net>",
+            "from": "HamaNasi <onboarding@hello.fueldash.net>",
             "to": [args["email"]],
-            "subject": "Reset Your Password",
-            "html": f"<p>To reset your password, click the following link: <a href='{reset_link}'>{reset_link}</a>. This link expires in 30 minutes.</p>"
+            "subject": "Password Reset Request",
+            "html": f"""
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #0063ff; border-radius: 8px;">
+                    <h2 style="color: #ffffff;">Reset Your Password</h2>
+                    <p>Dear User,</p>
+                    <p>We received a request to reset your password. To proceed, please click the button below:</p>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <a href="{reset_link}" style="background-color: #007bff; color: #fff; padding: 12px 20px; text-decoration: none; font-size: 16px; border-radius: 4px; display: inline-block;">Reset Password</a>
+                    </div>
+                    <p>If the button above doesn’t work, you can also use the following link:</p>
+                    <p><a href="{reset_link}">{reset_link}</a></p>
+                    <p><strong>Note:</strong> This link is valid for <strong>30 minutes</strong>. If you did not request this password reset, please ignore this email or contact our support team.</p>
+                    <p>For security reasons, do not share this link with anyone.</p>
+                    <p>Best regards,<br><strong>The HamaNasi Team</strong></p>
+                </div>
+            """
         }
+
         try:
             resend.Emails.send(reset_email_params)
         except Exception as e:

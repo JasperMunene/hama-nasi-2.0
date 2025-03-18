@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import Label from "@/components/form/Label";
 import Button from "@/components/elements/button/Button";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from 'sonner';
 
 export default function Verification() {
   const router = useRouter();
@@ -11,7 +11,9 @@ export default function Verification() {
   const email = searchParams.get("email"); // Fetch email from query params
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [resendTimer, setResendTimer] = useState(0); // countdown timer (in seconds)
+  const [resendTimer, setResendTimer] = useState(0); 
+  const [loading, setLoading] = useState(false); 
+  const [resending, setResending] = useState(false); 
 
   // useEffect to count down the timer when resend is disabled
   useEffect(() => {
@@ -45,10 +47,11 @@ export default function Verification() {
     
     // Ensure email is present before making the request
     if (!email) {
-      alert("Email not provided in the URL.");
+      toast.error("Email not provided in the URL.");
       return;
     }
 
+    setLoading(true);
     try {
       const response = await fetch("/api/auth/verify-otp", {
         method: "POST",
@@ -58,23 +61,27 @@ export default function Verification() {
       const data = await response.json();
       if (response.ok) {
         console.log("Email verified:", data);
+        toast.success("Email verified successfully!");
         router.push("/onboarding");
       } else {
         console.error("Verification error:", data);
-        alert(data.message || "Verification failed");
+        toast.error(data.message || "Verification failed");
       }
     } catch (err) {
       console.error("Error during verification:", err);
-      alert("Something went wrong!");
+      toast.error("Something went wrong!");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Handle resending the OTP
   const handleResend = async () => {
     if (!email) {
-      alert("Email not provided in the URL.");
+      toast.error("Email not provided in the URL.");
       return;
     }
+    setResending(true);
     try {
       const response = await fetch("http://127.0.0.1:5000/auth/resend-otp", {
         method: "POST",
@@ -83,15 +90,17 @@ export default function Verification() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert("OTP resent successfully. Please check your email.");
+        toast.success("OTP resent successfully. Please check your email.");
         // Disable the resend button for 30 seconds
         setResendTimer(30);
       } else {
-        alert(data.message || "Failed to resend OTP.");
+        toast.error(data.message || "Failed to resend OTP.");
       }
     } catch (err) {
       console.error("Error resending OTP:", err);
-      alert("Something went wrong while resending OTP!");
+      toast.error("Something went wrong while resending OTP!");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -130,8 +139,8 @@ export default function Verification() {
                   </div>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm" type="submit">
-                    Verify My Account
+                  <Button className="w-full" size="sm" type="submit" disabled={loading}>
+                    {loading ? "Verifying..." : "Verify My Account"}
                   </Button>
                 </div>
               </div>
@@ -141,12 +150,14 @@ export default function Verification() {
                 Didn&apos;t get the code?
               </p>
               <p 
-                className="text-sm pt-[2px] text-brand-500"
-                size="sm"
-                onClick={handleResend}
-                disabled={resendTimer > 0}
+                className={`text-sm pt-[2px] text-brand-500 ${resendTimer > 0 || resending ? "cursor-not-allowed" : "cursor-pointer"}`}
+                onClick={resendTimer > 0 || resending ? undefined : handleResend}
               >
-                {resendTimer > 0 ? `Resend (${resendTimer}s)` : "Resend"}
+                {resending
+                  ? "Resending..."
+                  : resendTimer > 0
+                  ? `Resend (${resendTimer}s)`
+                  : "Resend"}
               </p>
             </div>
           </div>
