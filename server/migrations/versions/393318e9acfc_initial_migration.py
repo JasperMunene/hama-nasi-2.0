@@ -1,8 +1,8 @@
-"""Initial Migration
+"""Initial MIgration
 
-Revision ID: 9963a8d27d81
+Revision ID: 393318e9acfc
 Revises: 
-Create Date: 2025-02-22 08:56:19.446068
+Create Date: 2025-03-18 09:11:38.309767
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9963a8d27d81'
+revision = '393318e9acfc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,8 +21,9 @@ def upgrade():
     op.create_table('movers',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('company_name', sa.String(length=150), nullable=False),
-    sa.Column('email', sa.String(length=150), nullable=False),
+    sa.Column('email', sa.String(length=150), nullable=True),
     sa.Column('phone', sa.String(length=15), nullable=False),
+    sa.Column('image', sa.String(length=255), nullable=True),
     sa.Column('rating', sa.Float(), nullable=True),
     sa.Column('availability_status', sa.String(length=50), nullable=True),
     sa.Column('house_type', sa.String(length=100), server_default='None', nullable=False),
@@ -42,7 +43,7 @@ def upgrade():
     op.create_table('inventory',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('item_name', sa.String(length=150), nullable=False),
-    sa.Column('category', sa.String(length=100), nullable=True),
+    sa.Column('image', sa.String(length=900), nullable=True),
     sa.Column('property_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -55,9 +56,16 @@ def upgrade():
     sa.Column('email', sa.String(length=150), nullable=False),
     sa.Column('password', sa.String(length=255), nullable=True),
     sa.Column('phone', sa.String(length=15), nullable=True),
+    sa.Column('image', sa.String(length=255), nullable=True),
     sa.Column('location', sa.String(length=255), nullable=True),
     sa.Column('role', sa.String(length=50), nullable=False),
     sa.Column('mover_id', sa.Integer(), nullable=True),
+    sa.Column('house_type', sa.String(length=100), server_default='None', nullable=False),
+    sa.Column('otp_code', sa.String(length=6), nullable=True),
+    sa.Column('otp_expires_at', sa.DateTime(), nullable=True),
+    sa.Column('is_verified', sa.Boolean(), nullable=True),
+    sa.Column('reset_token', sa.String(length=64), nullable=True),
+    sa.Column('reset_expires_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['mover_id'], ['movers.id'], name=op.f('fk_users_mover_id_movers'), ondelete='SET NULL'),
@@ -71,6 +79,7 @@ def upgrade():
     sa.Column('inventory_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=True),
     sa.Column('condition', sa.String(length=50), nullable=True),
+    sa.Column('priority', sa.String(length=50), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['inventory_id'], ['inventory.id'], name=op.f('fk_inventory_users_inventory_id_inventory'), ondelete='CASCADE'),
@@ -89,6 +98,7 @@ def upgrade():
     sa.Column('approved_price', sa.Float(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('distance', sa.Float(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_moves_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )

@@ -181,7 +181,6 @@ export default function Mover() {
                 >
                   <option value="">Select your house type</option>
                   <option value="bedsitter">Bedsitter</option>
-                  <option value="kibanda">Kibanda</option>
                   <option value="studio">Studio</option>
                   <option value="one_bedroom">One Bedroom</option>
                   <option value="two_bedroom">Two Bedroom</option>
