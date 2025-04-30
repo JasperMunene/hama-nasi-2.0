@@ -30,7 +30,7 @@ app.secret_key = os.getenv("SECRET_KEY", "a_default_secret_key")
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 # App Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_n4NWMdrEuOZ5@ep-dawn-breeze-a2ub9k1d-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("CONNECTION_STRING")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'secret'
 app.config['JWT_BLACKLIST_ENABLED'] = True

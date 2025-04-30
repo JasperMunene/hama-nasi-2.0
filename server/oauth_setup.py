@@ -1,4 +1,3 @@
-# oauth_setup.py
 import os
 from extensions import oauth
 
